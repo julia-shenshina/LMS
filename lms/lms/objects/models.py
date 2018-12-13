@@ -68,7 +68,3 @@ class Course(models.Model):
                                     related_name="courses",
                                     blank=True,
                                     null=True)
-
-    @classmethod
-    def add_professor(cls, professor):
-        cls.professor = professor
