@@ -15,7 +15,6 @@ class Person(models.Model):
 class Professor(Person):
     class ProfessorMeta(Person.Meta):
         db_table = 'professor_info'
-    pass
 
 
 class Student(models.Model):
@@ -33,22 +32,27 @@ class Student(models.Model):
     study_base = models.CharField(max_length=50,
                                   choices=settings.STUDY_BASES)
     email = models.EmailField(max_length=100,
-                              blank=True)
+                              blank=True,
+                              null=True,
+                              unique=True)
     phone = models.CharField(max_length=12,
                              validators=[phone_number_validation],
-                             blank=True)
-    user_id = models.CharField(max_length=50)
+                             blank=True,
+                             null=True,
+                             unique=True)
 
     class StudentMeta(Person.Meta):
         db_table = "student_info"
 
 
 class Faculty(models.Model):
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50,
+                            unique=True)
 
 
 class Group(models.Model):
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50,
+                            unique=True)
     faculty = models.ForeignKey('Faculty',
                                 on_delete=models.SET_NULL,
                                 related_name='groups',
@@ -57,7 +61,8 @@ class Group(models.Model):
 
 
 class Course(models.Model):
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50,
+                            unique=True)
     description = models.CharField(max_length=500)
     professor = models.ForeignKey('Professor',
                                   on_delete=models.SET_NULL,
