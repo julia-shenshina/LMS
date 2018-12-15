@@ -82,16 +82,15 @@ class Course(models.Model):
     name = models.CharField(max_length=64,
                             unique=True)
     description = models.CharField(max_length=512)
-    professor = models.ForeignKey('Professor',
-                                  on_delete=models.SET_NULL,
-                                  related_name="courses",
-                                  blank=True,
-                                  null=True)
+    professor = models.ManyToManyField('Professor',
+                                       related_name="courses",
+                                       blank=True,
+                                       null=True)
     groups = models.ManyToManyField('Group',
                                     related_name="courses",
                                     blank=True,
                                     null=True)
-    headmans = models.ManyToManyField("Student", related_name="driven_courses")
+    headmen = models.ManyToManyField("Student", related_name="driven_courses")
 
 
 class Material(models.Model):
@@ -104,7 +103,7 @@ class Material(models.Model):
 class Task(models.Model):
     name = models.CharField(max_length=128)
     text = models.CharField(max_length=512)
-    start_time = models.DateField(auto_now=True)
+    start_time = models.DateField()
     finish_time = models.DateField()
     course = models.ForeignKey("Course", related_name="tasks", on_delete=models.CASCADE)
 
