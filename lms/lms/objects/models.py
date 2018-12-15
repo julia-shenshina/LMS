@@ -1,12 +1,41 @@
 from django.db import models
 from django.conf import settings
+from uuid import uuid4
 
 from lms.objects.validation import phone_number_validation
 
 
 class Person(models.Model):
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
+    first_name = models.CharField(max_length=64)
+    last_name = models.CharField(max_length=64)
+    token = models.CharField(max_length=64,
+                             default=uuid4,
+                             null=True,
+                             unique=True,
+                             blank=True)
+    email = models.EmailField(max_length=128,
+                              blank=True,
+                              null=True,
+                              unique=True)
+    phone = models.CharField(max_length=12,
+                             validators=[phone_number_validation],
+                             blank=True,
+                             null=True,
+                             unique=True)
+    password = models.CharField(max_length=64, null=True, blank=True)
+    secret_key = models.CharField(max_length=64, null=True, blank=True)
+    vk_link = models.CharField(max_length=64,
+                               default="",
+                               blank=True)
+    fb_link = models.CharField(max_length=64,
+                               default="",
+                               blank=True)
+    linkedin_link = models.CharField(max_length=64,
+                                     default="",
+                                     blank=True)
+    insta_link = models.CharField(max_length=64,
+                                  default="",
+                                  blank=True)
 
     class Meta:
         abstract = True
@@ -17,41 +46,30 @@ class Professor(Person):
         db_table = 'professor_info'
 
 
-class Student(models.Model):
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
+class Student(Person):
     group = models.ForeignKey('Group',
                               on_delete=models.CASCADE,
                               related_name='students',
                               null=True)
     start_year = models.IntegerField(choices=settings.START_STUDY_YEARS)
-    degree = models.CharField(max_length=50,
+    degree = models.CharField(max_length=64,
                               choices=settings.DEGREES)
-    study_form = models.CharField(max_length=50,
+    study_form = models.CharField(max_length=64,
                                   choices=settings.STUDY_FORMS)
-    study_base = models.CharField(max_length=50,
+    study_base = models.CharField(max_length=64,
                                   choices=settings.STUDY_BASES)
-    email = models.EmailField(max_length=100,
-                              blank=True,
-                              null=True,
-                              unique=True)
-    phone = models.CharField(max_length=12,
-                             validators=[phone_number_validation],
-                             blank=True,
-                             null=True,
-                             unique=True)
 
     class StudentMeta(Person.Meta):
         db_table = "student_info"
 
 
 class Faculty(models.Model):
-    name = models.CharField(max_length=50,
+    name = models.CharField(max_length=64,
                             unique=True)
 
 
 class Group(models.Model):
-    name = models.CharField(max_length=50,
+    name = models.CharField(max_length=64,
                             unique=True)
     faculty = models.ForeignKey('Faculty',
                                 on_delete=models.SET_NULL,
@@ -61,9 +79,9 @@ class Group(models.Model):
 
 
 class Course(models.Model):
-    name = models.CharField(max_length=50,
+    name = models.CharField(max_length=64,
                             unique=True)
-    description = models.CharField(max_length=500)
+    description = models.CharField(max_length=512)
     professor = models.ForeignKey('Professor',
                                   on_delete=models.SET_NULL,
                                   related_name="courses",
@@ -73,3 +91,25 @@ class Course(models.Model):
                                     related_name="courses",
                                     blank=True,
                                     null=True)
+    headmans = models.ManyToManyField("Student", related_name="driven_courses")
+
+
+class Material(models.Model):
+    name = models.CharField(max_length=128)
+    text = models.CharField(max_length=512)
+    updated_at = models.DateField(auto_now=True)
+    course = models.ForeignKey("Course", related_name="materials", on_delete=models.CASCADE)
+
+
+class Task(models.Model):
+    name = models.CharField(max_length=128)
+    text = models.CharField(max_length=512)
+    start_time = models.DateField(auto_now=True)
+    finish_time = models.DateField()
+    course = models.ForeignKey("Course", related_name="tasks", on_delete=models.CASCADE)
+
+
+class Solution(models.Model):
+    student = models.ForeignKey("Student", related_name="solutions", on_delete=models.CASCADE)
+    task = models.ForeignKey("Task", related_name="solutions", on_delete=models.CASCADE)
+    text = models.CharField(max_length=512)
