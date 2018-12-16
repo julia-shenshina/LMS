@@ -2,7 +2,7 @@ from django.db import models
 from django.conf import settings
 from uuid import uuid4
 
-from lms.objects.validation import phone_number_validation
+from lms.validators import phone_number_validation
 
 
 class Person(models.Model):
@@ -75,7 +75,7 @@ class Group(models.Model):
                                 on_delete=models.SET_NULL,
                                 related_name='groups',
                                 null=True)
-    level = models.IntegerField()
+    level = models.IntegerField(choices=settings.STUDY_LEVEL)
 
 
 class Course(models.Model):
@@ -90,7 +90,7 @@ class Course(models.Model):
                                     related_name="courses",
                                     blank=True,
                                     null=True)
-    headmen = models.ManyToManyField("Student", related_name="driven_courses")
+    headmen = models.ManyToManyField("Student", related_name="driven_courses", blank=True)
 
 
 class Material(models.Model):

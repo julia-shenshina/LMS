@@ -1,5 +1,5 @@
 from django.contrib import admin
-from lms.objects.models import Student, Professor, Group, Course, Faculty, Task, Solution, Material
+from lms.models import Student, Professor, Group, Course, Faculty, Task, Solution, Material
 
 
 admin.site.register(Student)

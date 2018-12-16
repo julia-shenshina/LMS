@@ -33,7 +33,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'lms.objects.apps.ObjectsConfig',
+    'lms.apps.LMSConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -127,6 +127,8 @@ STATIC_URL = '/static/'
 # Constant fields
 START_STUDY_YEARS = [(x, x) for x in range(2000, timezone.now().year + 1)]
 
+STUDY_LEVEL = [(x, x) for x in range(1, 7)]
+
 STUDY_BASES = [
     ("bg", "бюджетная"),
     ("cnt", "контрактная")
@@ -147,5 +149,6 @@ DEGREES = [
 # REST API
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'DEFAULT_AUTHENTICATION_CLASSES': ('lms.api.auth.LMSAuthentication',),
     'PAGE_SIZE': 10
 }

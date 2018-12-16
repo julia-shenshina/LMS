@@ -1,19 +1,23 @@
 from django.conf.urls import url, include
 from django.contrib import admin
 from rest_framework import routers
-from lms.objects import views
-
+from lms.api import views
 
 router = routers.DefaultRouter()
-router.register(r'users', views.StudentViewSet)
+router.register(r'students', views.StudentViewSet)
 router.register(r'groups', views.GroupViewSet)
-router.register(r'faculty', views.FacultyViewSet)
-router.register(r'professor', views.ProfessorViewSet)
-router.register(r'course', views.CourseViewSet)
+router.register(r'faculties', views.FacultyViewSet)
+router.register(r'professors', views.ProfessorViewSet)
+router.register(r'courses', views.CourseViewSet, basename='course')
+router.register(r'materials', views.MaterialViewSet, basename='material')
+router.register(r'tasks', views.TaskViewSet, basename='task')
+router.register(r'solutions', views.SolutionViewSet, basename='solution')
 
 
 urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    url(r'admin/', admin.site.urls)
+    url(r'admin/', admin.site.urls),
+    url(r'^registration/$', views.RegistrationView.as_view()),
+    url(r'^login/$', views.LoginView.as_view())
 ]
