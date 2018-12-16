@@ -24,7 +24,7 @@ class TestAuth(APITestCase):
         assert professor.email == email
         assert professor.password == password
 
-    def test_login(self):
+    def test_login_ok(self):
         email = 'aaa@email.com'
         password = 'password'
 
@@ -38,3 +38,16 @@ class TestAuth(APITestCase):
         assert response.status_code == 200
         professor.refresh_from_db()
         assert response.json() == {'secret_key': professor.secret_key}
+
+    def test_login_fail(self):
+        email = 'aaa@email.com'
+        password = 'password'
+
+        professor = Professor.objects.create(
+            first_name='first', last_name='last', email=email, password=password
+        )
+        response = self.client.post(
+            reverse('login'),
+            data={'email': email, 'password': ""}
+        )
+        assert response.status_code != 200
