@@ -42,8 +42,7 @@ class Person(models.Model):
 
 
 class Professor(Person):
-    class ProfessorMeta(Person.Meta):
-        db_table = 'professor_info'
+    pass
 
 
 class Student(Person):
@@ -58,9 +57,6 @@ class Student(Person):
                                   choices=settings.STUDY_FORMS)
     study_base = models.CharField(max_length=64,
                                   choices=settings.STUDY_BASES)
-
-    class StudentMeta(Person.Meta):
-        db_table = "student_info"
 
 
 class Faculty(models.Model):

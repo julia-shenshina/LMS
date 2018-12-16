@@ -18,6 +18,6 @@ urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'admin/', admin.site.urls),
-    url(r'^registration/$', views.RegistrationView.as_view()),
-    url(r'^login/$', views.LoginView.as_view())
+    url(r'^registration/$', views.RegistrationView.as_view(), name='registration'),
+    url(r'^login/$', views.LoginView.as_view(), name='login')
 ]

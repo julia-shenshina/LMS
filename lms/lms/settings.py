@@ -34,6 +34,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'lms.apps.LMSConfig',
+    'django.apps.registry',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -150,5 +151,6 @@ DEGREES = [
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'DEFAULT_AUTHENTICATION_CLASSES': ('lms.api.auth.LMSAuthentication',),
+    'TEST_REQUEST_DEFAULT_FORMAT': 'json',
     'PAGE_SIZE': 10
 }
