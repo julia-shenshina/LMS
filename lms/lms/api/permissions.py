@@ -17,6 +17,14 @@ def can_edit_course_materials(requester, course):
     return requester in course.professor.all() or requester in course.headmen.all()
 
 
+def can_delete_course_materials(requester, course):
+    return requester in course.professor.all() or requester in course.headmen.all()
+
+
+def can_create_course_materials(requester, course):
+    return requester in course.professor.all() or requester in course.headmen.all()
+
+
 def can_edit_course_tasks(requester, course):
     return requester in course.professor.all()
 
