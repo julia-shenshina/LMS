@@ -2,7 +2,7 @@ from django.db import models
 from django.conf import settings
 from uuid import uuid4
 
-from lms.validators import phone_number_validation
+from lms.validators import *
 
 
 class Person(models.Model):
@@ -26,16 +26,23 @@ class Person(models.Model):
     secret_key = models.CharField(max_length=64, null=True, blank=True)
     vk_link = models.CharField(max_length=64,
                                default="",
-                               blank=True)
+                               blank=True,
+                               validators=[vk_link_validation])
     fb_link = models.CharField(max_length=64,
                                default="",
-                               blank=True)
+                               blank=True,
+                               validators=[fb_link_validation])
     linkedin_link = models.CharField(max_length=64,
                                      default="",
-                                     blank=True)
+                                     blank=True,
+                                     validators=[linkedin_link_validation])
     insta_link = models.CharField(max_length=64,
                                   default="",
-                                  blank=True)
+                                  blank=True,
+                                  validators=[insta_link_validation])
+    city = models.CharField(max_length=64,
+                            default="",
+                            blank=True)
 
     class Meta:
         abstract = True
@@ -108,3 +115,4 @@ class Solution(models.Model):
     student = models.ForeignKey("Student", related_name="solutions", on_delete=models.CASCADE)
     task = models.ForeignKey("Task", related_name="solutions", on_delete=models.CASCADE)
     text = models.CharField(max_length=512)
+    created_at = models.DateField(auto_now=True)
