@@ -75,3 +75,82 @@ class TestCourses(APITestCase):
         assert response.json().get('count') == 1
         assert len(response.json().get('results')[0]["groups"]) == 1
         assert response.json().get('results')[0]["groups"][0] == groups[0].id
+
+    def test_add_headmen_ok(self):
+        faculty = Faculty.objects.create(name="Факультет_1")
+        group = Group.objects.create(name='Группа_1', faculty=faculty, level=1)
+        student = Student.objects.create(
+            first_name="first", last_name="last", group=group, secret_key="123123", start_year=2017
+        )
+
+        professor = Professor.objects.create(
+            first_name='first_prof', last_name='last_prof', secret_key="456456"
+        )
+        course = Course.objects.create(name="Курс_1", description="Описание курса_1")
+        course.groups.set([group])
+        course.professor.set([professor])
+
+        course.refresh_from_db()
+        student.refresh_from_db()
+        professor.refresh_from_db()
+
+        response = self.client.patch(
+            reverse('course-detail', args=[course.id]),
+            data={'headmen': [student.id]},
+            **{'HTTP_X_SECRET_KEY': professor.secret_key}
+        )
+
+        assert response.status_code == 200
+
+    def test_add_headmen_failed(self):
+        faculty = Faculty.objects.create(name="Факультет_1")
+        group = Group.objects.create(name='Группа_1', faculty=faculty, level=1)
+        student = Student.objects.create(
+            first_name="first", last_name="last", group=group, secret_key="123123", start_year=2017
+        )
+
+        professor = Professor.objects.create(
+            first_name='first_prof', last_name='last_prof', secret_key="456456"
+        )
+        course = Course.objects.create(name="Курс_1", description="Описание курса_1")
+        course.professor.set([professor])
+
+        course.refresh_from_db()
+        student.refresh_from_db()
+        professor.refresh_from_db()
+
+        response = self.client.patch(
+            reverse('course-detail', args=[course.id]),
+            data={'headmen': [student.id]},
+            **{'HTTP_X_SECRET_KEY': professor.secret_key}
+        )
+
+        assert response.status_code == 400
+
+    def test_add_headmen_student(self):
+        faculty = Faculty.objects.create(name="Факультет_1")
+        group = Group.objects.create(name='Группа_1', faculty=faculty, level=1)
+        students = [
+            Student.objects.create(
+                first_name="first", last_name="last", group=group, secret_key="123123", start_year=2017
+            ),
+            Student.objects.create(
+                first_name="second", last_name="last", group=group, secret_key="567567", start_year=2017
+            )
+        ]
+
+        course = Course.objects.create(name="Курс_1", description="Описание курса_1")
+        course.groups.set([group])
+        course.headmen.set([students[0]])
+
+        course.refresh_from_db()
+        for student in students:
+            student.refresh_from_db()
+
+        response = self.client.patch(
+            reverse('course-detail', args=[course.id]),
+            data={'headmen': [students[1].id]},
+            **{'HTTP_X_SECRET_KEY': students[0].secret_key}
+        )
+
+        assert response.status_code == 403

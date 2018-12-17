@@ -44,3 +44,9 @@ def can_submit_solution(requester):
 def can_add_headman(requester, course):
     return requester in course.professor.all()
 
+
+def can_be_headman(students, course):
+    for student in students:
+        if course not in student.group.courses.all():
+            return False
+    return True

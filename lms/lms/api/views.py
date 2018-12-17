@@ -8,8 +8,6 @@ from lms.api import serializers, permissions, utils
 from lms.models import Student, Professor, Group, Faculty, Material, Task, Solution, Course
 
 import pdb
-
-
 class StudentViewSet(viewsets.mixins.RetrieveModelMixin,
                      viewsets.mixins.UpdateModelMixin,
                      viewsets.mixins.ListModelMixin,
@@ -86,14 +84,18 @@ class CourseViewSet(viewsets.mixins.RetrieveModelMixin,
             queryset = user.courses.all()
         return queryset
 
-    # def update(self, request, *args, **kwargs):
-    #     user = request.user
-    #     course_id = request.data.get('course')
-    #     course = Course.objects.filter(id=course_id).first()
-    #     if not permissions.can_add_headman(user, course):
-    #         raise PermissionDenied('You have no permissions to add headmen to this course.')
-    #
-    #     return super().update(self, *args, **kwargs)
+    def update(self, request, *args, **kwargs):
+        user = request.user
+        course = self.get_object()
+        if not permissions.can_add_headman(user, course):
+            raise PermissionDenied('You have no permissions to add headmen to this course.')
+
+        student_ids = request.data.get('headmen')
+        students = Student.objects.filter(id__in=student_ids).all()
+        if not permissions.can_be_headman(students, course):
+            raise ValidationError('This student has not this course')
+
+        return super().update(request, *args, **kwargs)
 
 
 class MaterialViewSet(viewsets.ModelViewSet):
@@ -175,7 +177,10 @@ class TaskViewSet(viewsets.ModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
 
-class SolutionViewSet(viewsets.ModelViewSet):
+class SolutionViewSet(viewsets.mixins.CreateModelMixin,
+                      viewsets.mixins.RetrieveModelMixin,
+                      viewsets.mixins.ListModelMixin,
+                      viewsets.GenericViewSet):
     serializer_class = serializers.SolutionSerializer
 
     def get_queryset(self):
@@ -191,7 +196,7 @@ class SolutionViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         request = serializer.context['request']
         if not permissions.can_submit_solution(request.user):
-            raise ValidationError('Only student cant submit solutions.')
+            raise PermissionDenied('Only student cant submit solutions.')
 
         task_id = request.data.get('task')
         today = timezone.now().date()
