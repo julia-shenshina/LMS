@@ -1,5 +1,3 @@
-import pdb
-
 from django.urls import reverse
 from rest_framework.test import APITestCase
 
@@ -8,7 +6,7 @@ from lms.models import Course, Faculty, Group, Professor, Student, Material
 
 class TestMaterials(APITestCase):
     def test_read_materials_professor(self):
-        professor = Professor.objects.create(first_name='first', last_name='last')
+        professor = Professor.objects.create(first_name='first', last_name='last', secret_key="123123")
 
         courses = [
             Course.objects.create(name="Курс_1", description="Описание курса_1"),
@@ -24,14 +22,20 @@ class TestMaterials(APITestCase):
         for course in courses:
             course.refresh_from_db()
 
-        assert len(professor.courses.first().materials.all()) == 1
-        assert professor.courses.first().materials.first() == courses[0].materials.first()
+        response = self.client.get(
+            reverse('material-list'),
+            **{"HTTP_X_SECRET_KEY": professor.secret_key}
+        )
+
+        assert response.status_code == 200
+        assert response.json().get("count") == 1
+        assert response.json().get("results")[0]["id"] == materials[0].id
 
     def test_read_materials_student(self):
         faculty = Faculty.objects.create(name="Факультет_1")
         group = Group.objects.create(name="Группа_1", faculty=faculty, level=1)
         student = Student.objects.create(
-            first_name="first", last_name="last", group=group, start_year=2016
+            first_name="first", last_name="last", group=group, start_year=2016, secret_key="123123"
         )
 
         courses = [
@@ -53,8 +57,14 @@ class TestMaterials(APITestCase):
         group.refresh_from_db()
         student.refresh_from_db()
 
-        assert len(student.group.courses.first().materials.all()) == 1
-        assert student.group.courses.first().materials.first() == materials[0]
+        response = self.client.get(
+            reverse('material-list'),
+            **{"HTTP_X_SECRET_KEY": student.secret_key}
+        )
+
+        assert response.status_code == 200
+        assert response.json().get("count") == 1
+        assert response.json().get("results")[0]["id"] == materials[0].id
 
     def test_update_materials_professor_ok(self):
         professor = Professor.objects.create(
