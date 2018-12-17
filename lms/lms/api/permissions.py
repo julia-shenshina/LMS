@@ -29,5 +29,18 @@ def can_edit_course_tasks(requester, course):
     return requester in course.professor.all()
 
 
+def can_create_course_tasks(requester, course):
+    return requester in course.professor.all()
+
+
+def can_delete_task(requester, task):
+    return requester in task.course.professor.all()
+
+
 def can_submit_solution(requester):
     return isinstance(requester, Student)
+
+
+def can_add_headman(requester, course):
+    return requester in course.professor.all()
+

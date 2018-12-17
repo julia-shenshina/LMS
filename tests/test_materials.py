@@ -211,8 +211,6 @@ class TestMaterials(APITestCase):
         faculty = Faculty.objects.create(name="Факультет_1")
         group = Group.objects.create(name="Группа_1", faculty=faculty, level=1)
 
-        email = "aaa@example.com"
-        password = "password"
         student = Student.objects.create(
             first_name="first", last_name="last", group=group, secret_key="123123", start_year=2017
         )
@@ -228,7 +226,6 @@ class TestMaterials(APITestCase):
 
         response = self.client.delete(
             reverse('material-detail', args=[material.id]),
-            data={'text': 'Текст учебника по курсу'},
             **{'HTTP_X_SECRET_KEY': student.secret_key}
         )
 

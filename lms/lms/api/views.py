@@ -7,6 +7,8 @@ from rest_framework.response import Response
 from lms.api import serializers, permissions, utils
 from lms.models import Student, Professor, Group, Faculty, Material, Task, Solution, Course
 
+import pdb
+
 
 class StudentViewSet(viewsets.mixins.RetrieveModelMixin,
                      viewsets.mixins.UpdateModelMixin,
@@ -84,6 +86,15 @@ class CourseViewSet(viewsets.mixins.RetrieveModelMixin,
             queryset = user.courses.all()
         return queryset
 
+    # def update(self, request, *args, **kwargs):
+    #     user = request.user
+    #     course_id = request.data.get('course')
+    #     course = Course.objects.filter(id=course_id).first()
+    #     if not permissions.can_add_headman(user, course):
+    #         raise PermissionDenied('You have no permissions to add headmen to this course.')
+    #
+    #     return super().update(self, *args, **kwargs)
+
 
 class MaterialViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.MaterialSerializer
@@ -145,6 +156,23 @@ class TaskViewSet(viewsets.ModelViewSet):
             raise PermissionDenied('You have no permissions to modify the task.')
 
         return super().update(request, *args, **kwargs)
+
+    def perform_create(self, serializer):
+        request = serializer.context['request']
+
+        course_id = request.data.get('course')
+        course = Course.objects.filter(id=course_id).first()
+
+        if not permissions.can_create_course_tasks(request.user, course):
+            raise PermissionDenied('You have no permissions to create tasks.')
+
+        return serializer.save()
+
+    def destroy(self, request, *args, **kwargs):
+        if not permissions.can_delete_course_materials(self.request.user, self.get_object().course):
+            raise PermissionDenied('You have no permissions to delete tasks.')
+
+        return super().destroy(request, *args, **kwargs)
 
 
 class SolutionViewSet(viewsets.ModelViewSet):
