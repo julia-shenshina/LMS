@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from lms.api import serializers, permissions, utils
 from lms.models import Student, Professor, Group, Faculty, Material, Task, Solution, Course
 
-import pdb
+
 class StudentViewSet(viewsets.mixins.RetrieveModelMixin,
                      viewsets.mixins.UpdateModelMixin,
                      viewsets.mixins.ListModelMixin,
@@ -21,6 +21,12 @@ class StudentViewSet(viewsets.mixins.RetrieveModelMixin,
 
         return serializers.StudentSerializer
 
+    def get_queryset(self):
+        user = self.request.user
+        group = Group.objects.filter(id=user.group.id).first()
+        queryset = Student.objects.filter(group=group).all().order_by('id')
+        return queryset
+
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
@@ -31,7 +37,7 @@ class StudentViewSet(viewsets.mixins.RetrieveModelMixin,
 
     def update(self, request, *args, **kwargs):
         if not permissions.can_edit_student_profile(self.request.user, self.get_object()):
-            raise PermissionDenied()
+            raise PermissionDenied('You have no permissions to update account.')
 
         return super().update(request, *args, **kwargs)
 
@@ -82,7 +88,7 @@ class CourseViewSet(viewsets.mixins.RetrieveModelMixin,
             queryset = user.group.courses.all()
         else:
             queryset = user.courses.all()
-        return queryset
+        return queryset.order_by('name')
 
     def update(self, request, *args, **kwargs):
         user = request.user
@@ -108,7 +114,7 @@ class MaterialViewSet(viewsets.ModelViewSet):
         else:
             courses = user.courses.all()
 
-        queryset = Material.objects.filter(course__in=courses).all()
+        queryset = Material.objects.filter(course__in=courses).all().order_by('updated_at')
         return queryset
 
     def perform_create(self, serializer):
@@ -151,7 +157,7 @@ class TaskViewSet(viewsets.ModelViewSet):
             courses = user.courses.all()
             queryset = Task.objects.filter(course__in=courses).all()
 
-        return queryset
+        return queryset.order_by('start_time')
 
     def update(self, request, *args, **kwargs):
         if not permissions.can_edit_course_tasks(self.request.user, self.get_object().course):
@@ -191,7 +197,7 @@ class SolutionViewSet(viewsets.mixins.CreateModelMixin,
             courses = user.courses.all()
             queryset = Solution.objects.filter(course__in=courses).all()
 
-        return queryset
+        return queryset.order_by('created_at')
 
     def perform_create(self, serializer):
         request = serializer.context['request']
@@ -242,7 +248,7 @@ class LoginView(views.APIView):
 
         person = utils.get_student_or_professor(email=email, password=password)
         if person is None:
-            raise ValidationError("no token")
+            raise ValidationError("No token.")
 
         person.secret_key = uuid4().hex
         person.save(update_fields=['secret_key'])

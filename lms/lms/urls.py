@@ -4,10 +4,10 @@ from rest_framework import routers
 from lms.api import views
 
 router = routers.DefaultRouter()
-router.register(r'students', views.StudentViewSet)
-router.register(r'groups', views.GroupViewSet)
-router.register(r'faculties', views.FacultyViewSet)
-router.register(r'professors', views.ProfessorViewSet)
+router.register(r'students', views.StudentViewSet, basename='student')
+router.register(r'groups', views.GroupViewSet, basename='group')
+router.register(r'faculties', views.FacultyViewSet, basename='faculty')
+router.register(r'professors', views.ProfessorViewSet, basename='professor')
 router.register(r'courses', views.CourseViewSet, basename='course')
 router.register(r'materials', views.MaterialViewSet, basename='material')
 router.register(r'tasks', views.TaskViewSet, basename='task')

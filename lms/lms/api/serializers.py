@@ -66,4 +66,4 @@ class MaterialSerializer(serializers.ModelSerializer):
 class SolutionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Solution
-        fields = ('id', 'text', 'task')
+        fields = ('id', 'text', 'task', 'created_at')
