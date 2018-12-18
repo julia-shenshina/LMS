@@ -1,7 +1,7 @@
 from django.urls import reverse
 from rest_framework.test import APITestCase
 
-from lms.models import Course, Faculty, Group, Professor, Student, Material
+from lms.models.models import Course, Faculty, Group, Professor, Student, Material
 
 
 class TestMaterials(APITestCase):

@@ -2,26 +2,28 @@
 
 """Setup script."""
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name="lms",
-    version="0.0.1",
+    version="1.0",
     author="Julia Shenshina",
     author_email="shenshina.ju@gmail.com",
     url="https://github.com/julia-shenshina/LMS",
     license="MIT",
-    packages=[
-        "lms",
-    ],
+    packages=find_packages(),
     setup_requires=[
+        "django",
+        "djangorestframework",
+        "django-rest-swagger"
+    ],
+    tests_require=[
         "pytest-runner",
         "pytest-pylint",
         "pytest-pycodestyle",
         "pytest-pep257",
         "pytest-cov",
-    ],
-    tests_require=[
+        "pytest-django",
         "pytest",
         "pylint",
         "pycodestyle",
@@ -33,7 +35,7 @@ setup(
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
     ],
-    # entry_points={
-    #     "console_scripts": ["lms=lms.lms:main"]
-    # }
+    entry_points={
+        "console_scripts": ["lms=lms.manage:manage"]
+    }
 )

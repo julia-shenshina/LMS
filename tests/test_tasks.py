@@ -2,7 +2,7 @@ from django.urls import reverse
 from django.utils import timezone
 from rest_framework.test import APITestCase
 
-from lms.models import Course, Faculty, Group, Professor, Student, Task
+from lms.models.models import Course, Faculty, Group, Professor, Student, Task
 
 
 class TestSolution(APITestCase):
