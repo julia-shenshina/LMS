@@ -11,23 +11,11 @@ setup(
     author_email="shenshina.ju@gmail.com",
     url="https://github.com/julia-shenshina/LMS",
     license="MIT",
-    packages=find_packages(),
+    packages=find_packages(exclude=['tests']),
     setup_requires=[
         "django",
         "djangorestframework",
         "django-rest-swagger"
-    ],
-    tests_require=[
-        "pytest-runner",
-        "pytest-pylint",
-        "pytest-pycodestyle",
-        "pytest-pep257",
-        "pytest-cov",
-        "pytest-django",
-        "pytest",
-        "pylint",
-        "pycodestyle",
-        "pep257",
     ],
     classifiers=[
         "Development Status :: 1 - Planning",
