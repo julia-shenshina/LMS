@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 
 def phone_number_validation(phone_number):
     if phone_number:
-        regex = re.compile(r"^\+?1?\d{9,15}$")
+        regex = re.compile(r"^(\+7|7|8)?[\s\-]?\(?[489][0-9]{2}\)?[\s\-]?[0-9]{3}[\s\-]?[0-9]{2}[\s\-]?[0-9]{2}$")
         assert regex.fullmatch(phone_number), ValidationError(message="Wrong phone number")
 
 

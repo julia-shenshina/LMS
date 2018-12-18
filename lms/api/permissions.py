@@ -1,4 +1,4 @@
-from lms.models import Student
+from lms.models.models import Student
 
 
 def can_edit_student_profile(requester, object):

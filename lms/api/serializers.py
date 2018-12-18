@@ -1,5 +1,11 @@
 from rest_framework import serializers
-from lms.models import Student, Professor, Course, Group, Faculty, Task, Solution, Material
+from lms.models.models import Student, Professor, Course, Group, Faculty, Task, Solution, Material
+
+
+class RegistrationSerializer(serializers.Serializer):
+    token = serializers.CharField()
+    email = serializers.CharField()
+    password = serializers.CharField()
 
 
 class StudentListSerializer(serializers.ModelSerializer):

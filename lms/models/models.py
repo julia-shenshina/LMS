@@ -2,7 +2,7 @@ from django.db import models
 from django.conf import settings
 from uuid import uuid4
 
-from lms.validators import *
+from lms.models.validators import *
 
 
 class Person(models.Model):

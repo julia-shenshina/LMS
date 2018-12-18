@@ -1,11 +1,12 @@
 from uuid import uuid4
 from django.utils import timezone
-from rest_framework import viewsets, views
+from rest_framework import viewsets, views, generics
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
 
-from lms.api import serializers, permissions, utils
-from lms.models import Student, Professor, Group, Faculty, Material, Task, Solution, Course
+from lms.api import serializers
+from lms.api import permissions, utils
+from lms.models.models import Student, Professor, Group, Faculty, Material, Task, Solution, Course
 
 
 class StudentViewSet(viewsets.mixins.RetrieveModelMixin,
@@ -54,6 +55,9 @@ class FacultyViewSet(viewsets.mixins.RetrieveModelMixin,
                      viewsets.GenericViewSet):
     queryset = Faculty.objects.all().order_by('name')
     serializer_class = serializers.FacultySerializer
+
+    def get_absolute_url(self):
+        return 'faculties/%i' % self.id
 
 
 class ProfessorViewSet(viewsets.mixins.RetrieveModelMixin,
@@ -213,23 +217,21 @@ class SolutionViewSet(viewsets.mixins.CreateModelMixin,
         return serializer.save(student=request.user, task=task)
 
 
-class RegistrationView(views.APIView):
+class RegistrationView(generics.GenericAPIView):
     authentication_classes = ()
+    serializer_class = serializers.RegistrationSerializer
 
     def post(self, request):
-        data = request.data
-        token = data.get('token')
-        email = data.get('email')
-        password = data.get('password')
-        if not all((token, email, password)):
+        serializer = serializers.RegistrationSerializer(data=request.data)
+        if not serializer.is_valid():
             raise ValidationError("Token, email and password should be provided")
 
-        person = utils.get_student_or_professor(token=token)
+        person = utils.get_student_or_professor(token=serializer.data['token'])
         if person is None:
-            raise ValidationError("no token")
+            raise ValidationError("No token")
 
-        person.email = email
-        person.password = password
+        person.email = serializer.data['email']
+        person.password = serializer.data['password']
         person.token = None
         person.save(update_fields=['email', 'password', 'token'])
         return views.Response('ok')
