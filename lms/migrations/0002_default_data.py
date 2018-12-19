@@ -25,7 +25,8 @@ def create_default_professors(apps):
     Professor = apps.get_model('lms', 'Professor')
     professors = [
         Professor.objects.create(
-            first_name='Katy', last_name='Perry', insta_link='https://www.instagram.com/katyperry/'
+            first_name='Katy', last_name='Perry', insta_link='https://www.instagram.com/katyperry/',
+            email='katy@perry.com', password='12345678'
         ),
         Professor.objects.create(
             first_name='Профессор', last_name='Профессорович', phone='89000000000'
@@ -48,8 +49,11 @@ def create_default_students(apps, groups):
     for i, group in enumerate(groups):
         current = []
         for j in range(2):
+            email = "aaa@example.com" if i == 0 and j == 0 else None
+            password = "qwertyqwerty" if i == 0 and j == 0 else None
             current.append(Student.objects.create(
-                first_name='Имя_%s%s' % (i + 1, j + 1), last_name='Фамилия_%s%s' % (i + 1, j + 1), group=group, start_year=2018
+                first_name='Имя_%s%s' % (i + 1, j + 1), last_name='Фамилия_%s%s' % (i + 1, j + 1), group=group,
+                start_year=2018, email=email, password=password
             ))
         students.append(current)
     return students
