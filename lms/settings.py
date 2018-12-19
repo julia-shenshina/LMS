@@ -141,5 +141,10 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'DEFAULT_AUTHENTICATION_CLASSES': ('lms.api.auth.LMSAuthentication',),
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',
-    'PAGE_SIZE': 10
+    'PAGE_SIZE': 10,
+}
+
+SWAGGER_SETTINGS = {
+    'OPERATIONS_SORTER': 'alpha',
+    'SUPPORTED_SUBMIT_METHODS': ['GET', 'POST', 'PATCH', 'DELETE']
 }
