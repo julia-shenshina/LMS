@@ -38,6 +38,41 @@ class TestStudent(APITestCase):
         assert response.json().get('results')[0]['id'] == students[0].id
         assert response.json().get('results')[1]['id'] == students[1].id
 
+    def test_get_other_student_profile(self):
+        faculty = Faculty.objects.create(name="Факультет_1")
+        group = Group.objects.create(name="Группа_1", faculty=faculty, level=1)
+        students = [
+            Student.objects.create(
+                first_name="first", last_name="last", group=group, secret_key="1", start_year=2017, study_base="bg"
+            ),
+            Student.objects.create(
+                first_name="first", last_name="last", group=group, secret_key="2", start_year=2017, study_base="bg"
+            )
+        ]
+
+        response = self.client.get(
+            reverse('student-detail', args=[students[1].id]),
+            **{"HTTP_X_SECRET_KEY": students[0].secret_key}
+        )
+
+        assert response.status_code == 200
+        assert 'study_base' not in response.json()
+
+    def test_get_other_student_profile(self):
+        faculty = Faculty.objects.create(name="Факультет_1")
+        group = Group.objects.create(name="Группа_1", faculty=faculty, level=1)
+        student = Student.objects.create(
+            first_name="first", last_name="last", group=group, secret_key="1", start_year=2017, study_base="bg"
+        )
+
+        response = self.client.get(
+            reverse('student-detail', args=[student.id]),
+            **{"HTTP_X_SECRET_KEY": student.secret_key}
+        )
+
+        assert response.status_code == 200
+        assert 'study_base' in response.json()
+
     def test_update_student_ok(self):
         faculty = Faculty.objects.create(name="Факультет_1")
         group = Group.objects.create(name="Группа_1", faculty=faculty, level=1)
