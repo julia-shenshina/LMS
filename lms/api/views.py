@@ -1,8 +1,16 @@
 from uuid import uuid4
+
+from django.core import exceptions
 from django.utils import timezone
 from rest_framework import viewsets, views, generics
 from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.permissions import AllowAny
+from rest_framework.renderers import CoreJSONRenderer
 from rest_framework.response import Response
+from rest_framework.schemas import SchemaGenerator
+from rest_framework.views import APIView
+from rest_framework_swagger import renderers
+from rest_framework_swagger.views import get_swagger_view
 
 from lms.api import serializers
 from lms.api import permissions, utils
@@ -13,6 +21,16 @@ class StudentViewSet(viewsets.mixins.RetrieveModelMixin,
                      viewsets.mixins.UpdateModelMixin,
                      viewsets.mixins.ListModelMixin,
                      viewsets.GenericViewSet):
+    """
+    list:
+    For student return a list of groupmates, for professor return a list of students of professor'a courses
+
+    retrieve:
+    Return student with id
+
+    update:
+    Change student's account info
+    """
     queryset = Student.objects.all().order_by('last_name')
     serializer_class = serializers.StudentSerializer
 
@@ -46,6 +64,13 @@ class StudentViewSet(viewsets.mixins.RetrieveModelMixin,
 class GroupViewSet(viewsets.mixins.RetrieveModelMixin,
                    viewsets.mixins.ListModelMixin,
                    viewsets.GenericViewSet):
+    """
+    list:
+    Return a list of groups
+
+    retrieve:
+    Return group with id
+    """
     queryset = Group.objects.all().order_by('name')
     serializer_class = serializers.GroupSerializer
 
@@ -53,6 +78,13 @@ class GroupViewSet(viewsets.mixins.RetrieveModelMixin,
 class FacultyViewSet(viewsets.mixins.RetrieveModelMixin,
                      viewsets.mixins.ListModelMixin,
                      viewsets.GenericViewSet):
+    """
+    list:
+    Return a list of faculties
+
+    retrieve:
+    Return faculty with id
+    """
     queryset = Faculty.objects.all().order_by('name')
     serializer_class = serializers.FacultySerializer
 
@@ -64,6 +96,16 @@ class ProfessorViewSet(viewsets.mixins.RetrieveModelMixin,
                        viewsets.mixins.UpdateModelMixin,
                        viewsets.mixins.ListModelMixin,
                        viewsets.GenericViewSet):
+    """
+    list:
+    Return a list of professors
+
+    retrieve:
+    Return professor with id
+
+    update:
+    Change professor's account info
+    """
     queryset = Professor.objects.all().order_by('last_name')
     serializer_class = serializers.ProfessorSerializer
 
@@ -84,6 +126,16 @@ class CourseViewSet(viewsets.mixins.RetrieveModelMixin,
                     viewsets.mixins.UpdateModelMixin,
                     viewsets.mixins.ListModelMixin,
                     viewsets.GenericViewSet):
+    """
+    retrieve:
+    Return course with id
+
+    list:
+    Return list of user's courses
+
+    update:
+    Add headmen to the course
+    """
     serializer_class = serializers.CourseSerializer
 
     def get_queryset(self):
@@ -109,6 +161,22 @@ class CourseViewSet(viewsets.mixins.RetrieveModelMixin,
 
 
 class MaterialViewSet(viewsets.ModelViewSet):
+    """
+    list:
+    Returns user's courses list materials
+
+    retrieve:
+    Return material with id
+
+    create:
+    Create course material
+
+    update:
+    Update course material
+
+    delete:
+    Delete course material
+    """
     serializer_class = serializers.MaterialSerializer
 
     def get_queryset(self):
@@ -149,9 +217,23 @@ class MaterialViewSet(viewsets.ModelViewSet):
 
 
 class TaskViewSet(viewsets.ModelViewSet):
+    """
+    list:
+    Return a list of tasks of user's courses
+
+    retrieve:
+    Return task with id
+
+    update:
+    Update task with id
+
+    create:
+    Create task
+    """
     serializer_class = serializers.TaskSerializer
 
     def get_queryset(self):
+        """Get tasks for user's courses"""
         user = self.request.user
         if isinstance(user, Student):
             courses = user.group.courses.all()
@@ -191,6 +273,16 @@ class SolutionViewSet(viewsets.mixins.CreateModelMixin,
                       viewsets.mixins.RetrieveModelMixin,
                       viewsets.mixins.ListModelMixin,
                       viewsets.GenericViewSet):
+    """
+    list:
+    Return a list of user's solutions
+
+    retrieve:
+    Return solution with id
+
+    create:
+    Create solution
+    """
     serializer_class = serializers.SolutionSerializer
 
     def get_queryset(self):
@@ -199,7 +291,7 @@ class SolutionViewSet(viewsets.mixins.CreateModelMixin,
             queryset = user.solutions.all()
         else:
             courses = user.courses.all()
-            queryset = Solution.objects.filter(course__in=courses).all()
+            queryset = Solution.objects.filter(course__in=courses).order_by('student__group').all()
 
         return queryset.order_by('created_at')
 
@@ -218,6 +310,10 @@ class SolutionViewSet(viewsets.mixins.CreateModelMixin,
 
 
 class RegistrationView(generics.GenericAPIView):
+    """
+    post:
+    Registration of pre-registered user
+    """
     authentication_classes = ()
     serializer_class = serializers.RegistrationSerializer
 
@@ -238,9 +334,14 @@ class RegistrationView(generics.GenericAPIView):
 
 
 class LoginView(views.APIView):
+    """
+    post:
+    Login for reistered user, return secret_key
+    """
     authentication_classes = ()
 
     def post(self, request):
+        """ Login user and return secret key for next requests"""
         data = request.data
         email = data.get('email')
         password = data.get('password')
@@ -255,3 +356,36 @@ class LoginView(views.APIView):
         person.secret_key = uuid4().hex
         person.save(update_fields=['secret_key'])
         return views.Response({'secret_key': person.secret_key})
+
+
+def get_swagger_view(title=None, url=None, patterns=None, urlconf=None):
+    class SwaggerSchemaView(APIView):
+        """Returns a list of API documentation"""
+        authentication_classes = ()
+
+        _ignore_model_permissions = True
+        exclude_from_schema = True
+        permission_classes = [AllowAny]
+        renderer_classes = [
+            CoreJSONRenderer,
+            renderers.OpenAPIRenderer,
+            renderers.SwaggerUIRenderer
+        ]
+
+        def get(self, request):
+            generator = SchemaGenerator(
+                title=title,
+                url=url,
+                patterns=patterns,
+                urlconf=urlconf
+            )
+            schema = generator.get_schema(request=request)
+
+            if not schema:
+                raise ValidationError(
+                    'The schema generator did not return a schema Document'
+                )
+
+            return Response(schema)
+
+    return SwaggerSchemaView.as_view()

@@ -15,9 +15,13 @@ router.register(r'tasks', views.TaskViewSet, basename='task')
 router.register(r'solutions', views.SolutionViewSet, basename='solution')
 
 
+swagger_schema_view = views.get_swagger_view(title="LMS API")
+swagger_schema_view.authentication_classes = ()
+
 urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'admin/', admin.site.urls),
+    url(r'docs/', swagger_schema_view),
     url(r'^registration/$', views.RegistrationView.as_view(), name='registration'),
     url(r'^login/$', views.LoginView.as_view(), name='login')
 ]
