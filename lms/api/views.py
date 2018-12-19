@@ -1,6 +1,5 @@
 from uuid import uuid4
 
-from django.core import exceptions
 from django.utils import timezone
 from rest_framework import viewsets, views, generics
 from rest_framework.exceptions import PermissionDenied, ValidationError
@@ -10,7 +9,6 @@ from rest_framework.response import Response
 from rest_framework.schemas import SchemaGenerator
 from rest_framework.views import APIView
 from rest_framework_swagger import renderers
-from rest_framework_swagger.views import get_swagger_view
 
 from lms.api import serializers
 from lms.api import permissions, utils
@@ -42,8 +40,13 @@ class StudentViewSet(viewsets.mixins.RetrieveModelMixin,
 
     def get_queryset(self):
         user = self.request.user
-        group = Group.objects.filter(id=user.group.id).first()
-        queryset = Student.objects.filter(group=group).all().order_by('id')
+        if isinstance(user, Student):
+            group = Group.objects.filter(id=user.group.id).first()
+            queryset = Student.objects.filter(group=group).all().order_by('last_name')
+        else:
+
+            queryset = Student.objects.filter(group__courses__professor=user)
+
         return queryset
 
     def retrieve(self, request, *args, **kwargs):
