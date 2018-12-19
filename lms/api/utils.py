@@ -1,4 +1,4 @@
-from lms.models import Student, Professor
+from lms.models.models import Student, Professor
 
 
 def get_student_or_professor(**params):

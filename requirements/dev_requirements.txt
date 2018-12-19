@@ -1,0 +1,11 @@
+pytest-runner
+pytest-pylint
+pytest-pycodestyle
+pytest-pep257
+pytest-cov
+pytest-django
+pytest
+pylint
+pycodestyle
+pep257
+codecov
