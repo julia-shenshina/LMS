@@ -368,8 +368,8 @@ class LoginView(generics.GenericAPIView):
         if not serializer.is_valid():
             raise ValidationError('Email and password should be provided.')
 
-        email = serializer.email
-        password = serializer.password
+        email = serializer.data['email']
+        password = serializer.data['password']
         person = utils.get_student_or_professor(email=email, password=password)
         if person is None:
             raise ValidationError("No user with this params.")
