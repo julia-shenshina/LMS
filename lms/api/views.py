@@ -28,6 +28,9 @@ class StudentViewSet(viewsets.mixins.RetrieveModelMixin,
 
     update:
     Change student's account info
+
+    partial_update:
+    Change some fields of student's account info
     """
     queryset = Student.objects.all().order_by('last_name')
     serializer_class = serializers.StudentSerializer
@@ -108,6 +111,9 @@ class ProfessorViewSet(viewsets.mixins.RetrieveModelMixin,
 
     update:
     Change professor's account info
+
+    partial_update:
+    Change some fields of professor's account info
     """
     queryset = Professor.objects.all().order_by('last_name')
     serializer_class = serializers.ProfessorSerializer
@@ -137,6 +143,9 @@ class CourseViewSet(viewsets.mixins.RetrieveModelMixin,
     Return list of user's courses
 
     update:
+    Add headmen to the course
+
+    partial_update:
     Add headmen to the course
     """
     serializer_class = serializers.CourseSerializer
@@ -176,6 +185,9 @@ class MaterialViewSet(viewsets.ModelViewSet):
 
     update:
     Update course material
+
+    partial_update:
+    Update some fields of material
 
     delete:
     Delete course material
@@ -230,8 +242,14 @@ class TaskViewSet(viewsets.ModelViewSet):
     update:
     Update task with id
 
+    partial_update:
+    Update some fields of task
+
     create:
     Create task
+
+    destroy:
+    Delete task with id
     """
     serializer_class = serializers.TaskSerializer
 
@@ -336,25 +354,25 @@ class RegistrationView(generics.GenericAPIView):
         return views.Response('ok')
 
 
-class LoginView(views.APIView):
+class LoginView(generics.GenericAPIView):
     """
     post:
-    Login for reistered user, return secret_key
+    Login for registered user, return secret_key
     """
     authentication_classes = ()
+    serializer_class = serializers.LoginSerializer
 
     def post(self, request):
         """ Login user and return secret key for next requests"""
-        data = request.data
-        email = data.get('email')
-        password = data.get('password')
-
-        if not all((email, password)):
+        serializer = serializers.LoginSerializer(data=request.data)
+        if not serializer.is_valid():
             raise ValidationError('Email and password should be provided.')
 
+        email = serializer.email
+        password = serializer.password
         person = utils.get_student_or_professor(email=email, password=password)
         if person is None:
-            raise ValidationError("No token.")
+            raise ValidationError("No user with this params.")
 
         person.secret_key = uuid4().hex
         person.save(update_fields=['secret_key'])

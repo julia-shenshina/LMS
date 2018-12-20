@@ -8,6 +8,11 @@ class RegistrationSerializer(serializers.Serializer):
     password = serializers.CharField()
 
 
+class LoginSerializer(serializers.Serializer):
+    email = serializers.CharField()
+    password = serializers.CharField()
+
+
 class StudentListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
