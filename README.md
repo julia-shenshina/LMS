@@ -12,8 +12,9 @@ To install run
 ```python
 cd /target_directory_path/LMS
 pip install -r requirements/requirements.txt
-ip install -r requirements/dev_requirements.txt
+pip install -r requirements/dev_requirements.txt
 pip install -e .
+lms migrate
 ```
 ### Run
 ```python
